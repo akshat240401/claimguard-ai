@@ -101,7 +101,7 @@ st.markdown(
         }
 
         [data-testid="stVerticalBlock"] {
-            gap: 0.5rem !important;
+            gap: 0.45rem !important;
         }
 
         [data-testid="stMetric"] {
@@ -118,17 +118,32 @@ st.markdown(
             overflow: visible !important;
             text-overflow: unset !important;
             font-size: 2rem !important;
-            line-height: 1.15 !important;
+            line-height: 1.05 !important;
         }
 
         [data-testid="stCaptionContainer"] {
             margin-top: 0 !important;
-            margin-bottom: 0.15rem !important;
+            margin-bottom: 0 !important;
+        }
+
+        [data-testid="stPlotlyChart"] {
+            margin-top: -0.25rem !important;
+            margin-bottom: -0.25rem !important;
+        }
+
+        [data-testid="stDataFrame"] {
+            margin-top: 0 !important;
+            margin-bottom: 0.2rem !important;
         }
 
         button[data-baseweb="tab"] {
             padding-top: 0.35rem !important;
             padding-bottom: 0.35rem !important;
+        }
+
+        h3 {
+            margin-top: 0.35rem !important;
+            margin-bottom: 0.2rem !important;
         }
 
         hr {
@@ -417,13 +432,27 @@ def render_overview(
 
     priority_chart.update_layout(
         showlegend=False,
-        height=285,
+        height=390,
         margin={
-            "l": 15,
-            "r": 15,
-            "t": 45,
-            "b": 10,
+            "l": 20,
+            "r": 20,
+            "t": 55,
+            "b": 20,
         },
+        title={
+            "font": {
+                "size": 17,
+            },
+        },
+        bargap=0.30,
+    )
+
+    priority_chart.update_yaxes(
+        automargin=True,
+    )
+
+    priority_chart.update_xaxes(
+        automargin=True,
     )
 
     with chart_col1:
@@ -462,13 +491,34 @@ def render_overview(
     )
 
     scatter.update_layout(
-        height=285,
+        height=390,
         margin={
-            "l": 15,
-            "r": 15,
-            "t": 45,
-            "b": 10,
+            "l": 20,
+            "r": 20,
+            "t": 55,
+            "b": 20,
         },
+        title={
+            "font": {
+                "size": 17,
+            },
+        },
+        legend={
+            "title": {
+                "text": "Review priority",
+            },
+            "font": {
+                "size": 11,
+            },
+        },
+    )
+
+    scatter.update_yaxes(
+        automargin=True,
+    )
+
+    scatter.update_xaxes(
+        automargin=True,
     )
 
     max_amount = max(
@@ -585,9 +635,7 @@ def render_claims_review(
         data=table.to_csv(
             index=False
         ).encode("utf-8"),
-        file_name=(
-            "claimguard_filtered_results.csv"
-        ),
+        file_name="claimguard_filtered_results.csv",
         mime="text/csv",
     )
 
@@ -699,12 +747,8 @@ def render_claim_details(
                 "Amount / provider average",
             ],
             "Value": [
-                (
-                    f"${float(claim['claim_amount']):,.2f}"
-                ),
-                (
-                    f"${float(claim['expected_amount']):,.2f}"
-                ),
+                f"${float(claim['claim_amount']):,.2f}",
+                f"${float(claim['expected_amount']):,.2f}",
                 (
                     f"${float(claim['provider_average_amount']):,.2f}"
                 ),
@@ -918,27 +962,35 @@ def render_evaluation(
                     "Detection rate"
                 ),
             },
-            title=(
-                "Detection by anomaly difficulty"
-            ),
-        )
-
-        difficulty_chart.update_yaxes(
-            range=[0, 1],
-            tickformat=".0%",
+            title="Detection by anomaly difficulty",
         )
 
         difficulty_chart.update_traces(
             textposition="outside",
         )
 
+        difficulty_chart.update_xaxes(
+            title=None,
+        )
+
+        difficulty_chart.update_yaxes(
+            title="Detection rate",
+            range=[0, 1.15],
+            tickformat=".0%",
+            automargin=True,
+        )
+
         difficulty_chart.update_layout(
-            height=300,
+            height=210,
             margin={
-                "l": 15,
-                "r": 15,
+                "l": 10,
+                "r": 10,
                 "t": 45,
-                "b": 10,
+                "b": 0,
+            },
+            showlegend=False,
+            font={
+                "size": 11,
             },
         )
 
@@ -975,14 +1027,28 @@ def render_evaluation(
         }
     )
 
-    st.subheader(
-        "Synthetic evaluation breakdown"
+    st.markdown(
+        "### Synthetic evaluation breakdown"
     )
 
     st.dataframe(
         evaluation_table,
         use_container_width=True,
         hide_index=True,
+        height=170,
+        column_config={
+            "Outcome": (
+                st.column_config.TextColumn(
+                    "Outcome"
+                )
+            ),
+            "Claims": (
+                st.column_config.NumberColumn(
+                    "Claims",
+                    format="%d",
+                )
+            ),
+        },
     )
 
     if "case_profile" in scored.columns:
@@ -1008,14 +1074,15 @@ def render_evaluation(
             * 100
         )
 
-        st.subheader(
-            "Results by synthetic case profile"
+        st.markdown(
+            "### Results by synthetic case profile"
         )
 
         st.dataframe(
             profile_summary,
             use_container_width=True,
             hide_index=True,
+            height=285,
             column_config={
                 "case_profile": (
                     st.column_config.TextColumn(
